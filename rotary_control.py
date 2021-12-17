@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+
+# Codebase from: https://blog.ploetzli.ch/2018/ky-040-rotary-encoder-linux-raspberry-pi/
+# Adapted to Phoniebox Volume Control by Peter Mayer; https://github.com/PM84/phoniebox_helper.git
+
+# === Install:
+# Add to /boot/config.txt three lines:
+# # enable rotary encoder
+# dtoverlay=rotary-encoder,pin_a=23,pin_b=24,relative_axis=1
+# dtoverlay=gpio-key,gpio=22,keycode=28,label="ENTER"
+# 
+# pin_a and pin_b mean the GPIO Pins and NOT the physical pins. Adjust these values to your needs.
+#
+# Reboot your Pi.
+#
+# Run the script py
+# python3 rotary_control.py
+
 from __future__ import print_function
 
 import evdev
