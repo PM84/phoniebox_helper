@@ -8,8 +8,9 @@ import os
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
 
-value = 1
-print("Value: {0}".format(value))
+global vol
+vol = 1
+print("Volume: {0}".format(vol))
 
 
 def readVolume():
@@ -34,8 +35,8 @@ while not done:
         for event in devices[fd].read():
             event = evdev.util.categorize(event)
             if isinstance(event, evdev.events.RelEvent):
-                value = readVolume() + getVolumeStep()
-                print("Value: {0}".format(value))
+                vol = readVolume() + getVolumeStep()
+                print("Volume: {0}".format(vol))
             elif isinstance(event, evdev.events.KeyEvent):
                 if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
                     MuteAudio()
