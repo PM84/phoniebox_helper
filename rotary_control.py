@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import evdev
 import select
+import os
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
