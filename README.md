@@ -18,7 +18,7 @@ KY-040 Rotary encoder (e.g. https://amzn.to/3ITAzuR)
 
 ## Install:
 
-Add to /boot/config.txt three lines to the end of the file:
+Add to **/boot/config.txt** three lines to the end of the file:
 ```
 # enable rotary encoder
 dtoverlay=rotary-encoder,pin_a=5,pin_b=6,relative_axis=1
