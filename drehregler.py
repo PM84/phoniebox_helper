@@ -5,7 +5,7 @@ from RPi import GPIO
  
 print ("Started")
 
-os.system('clear') #clear screen, this is just for the OCD purposes
+os.popen('clear') #clear screen, this is just for the OCD purposes
  
 step = 5 #linear steps for increasing/decreasing volume
 paused = False #paused state
@@ -34,42 +34,42 @@ if counter == 0 : counter = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/pla
 
 #define functions which will be triggered on pin state changes
 def clkClicked(channel):
-        global counter
-        global step
+    global counter
+    global step
 
-        clkState = GPIO.input(clk)
-        dtState = GPIO.input(dt)
+    clkState = GPIO.input(clk)
+    dtState = GPIO.input(dt)
 
-        if clkState == 0 and dtState == 1:
-                counter = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read())
-                counter = counter + step
-                if counter > 100: counter = 100
-                os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(counter))
+    if clkState == 0 and dtState == 1:
+        counter = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read())
+        counter = counter + step
+        if counter > 100: counter = 100
+        os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(counter))
 #                print ("Counter ", counter)
 
 def dtClicked(channel):
-        global counter
-        global step
+    global counter
+    global step
 
-        clkState = GPIO.input(clk)
-        dtState = GPIO.input(dt)
+    clkState = GPIO.input(clk)
+    dtState = GPIO.input(dt)
 
-        if clkState == 1 and dtState == 0:
-                counter = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read())
-                counter = counter - step
-                if counter < 0: counter = 0
-                os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(counter))
+    if clkState == 1 and dtState == 0:
+        counter = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read())
+        counter = counter - step
+        if counter < 0: counter = 0
+        os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(counter))
 #                print ("Counter ", counter)
 
 def swClicked(channel):
-        global paused
-        paused = not paused
-        if paused == True :
-              os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
+    global paused
+    paused = not paused
+    if paused == True :
+        os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
 #              os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=playerpause")
-        if paused == False :
-              bootvol = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getbootvolume").read()
-              os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(bootvol))
+    if paused == False :
+        bootvol = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getbootvolume").read()
+        os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(bootvol))
 #              os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=playerplay")
 #        print ("Paused ", paused)
 
