@@ -25,7 +25,7 @@ def getVolumeStep():
 def setVolume(volume, volume_step):
     os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(100, max(0, volume + volume_step))))
     return min(100, max(0, volume + volume_step))
-def MuteAudio():
+def MuteUnmuteAudio():
     if readVolume() > 1:
         os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
     else:
@@ -42,5 +42,4 @@ while not done:
                 print("Volume: {0}".format(vol))
             elif isinstance(event, evdev.events.KeyEvent):
                 if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
-                    MuteAudio()
-                    print("Mute-Button gedrückt")
+                    MuteUnmuteAudio()
