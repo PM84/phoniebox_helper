@@ -53,14 +53,20 @@ Insert the One-Line-Installer from https://github.com/splitti/phoniebox_rotary_c
 cd; rm prc_installer.sh; wget https://raw.githubusercontent.com/splitti/phoniebox_rotary_control/master/scripts/install/prc_installer.sh; chmod +x prc_installer.sh; ./prc_installer.sh
 ```
 ![image](https://user-images.githubusercontent.com/7900120/146546938-25b71229-8333-4d69-ab8a-e4d8d1b9554b.png)
+
 **Hit Enter**
+
 ![image](https://user-images.githubusercontent.com/7900120/146546979-81f25d52-3e11-4d21-bdeb-a568bada1857.png)
+
 **Type => 1**
+
 ![image](https://user-images.githubusercontent.com/7900120/146547084-6a8e5f72-e593-4212-ba1a-f7e3d10cf52d.png)
+
 **Type => 1** to reboot the pi
 
 Check if the service is running:
 ```
 sudo service phoniebox-rotary-control status
 ```
+
 ![image](https://user-images.githubusercontent.com/7900120/146547397-39d0074b-4330-4f54-8a06-52f1a70fb325.png)
