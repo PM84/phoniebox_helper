@@ -8,11 +8,6 @@ import os
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
 
-global vol
-vol = 1
-print("Volume: {0}".format(vol))
-
-
 def readVolume():
     value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
     return int(value)
@@ -38,8 +33,7 @@ while not done:
         for event in devices[fd].read():
             event = evdev.util.categorize(event)
             if isinstance(event, evdev.events.RelEvent):
-                vol = setVolume(readVolume(), event.event.value * getVolumeStep())
-                print("Volume: {0}".format(vol))
+                setVolume(readVolume(), event.event.value * getVolumeStep())
             elif isinstance(event, evdev.events.KeyEvent):
                 if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
                     MuteUnmuteAudio()
