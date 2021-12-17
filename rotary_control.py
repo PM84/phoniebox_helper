@@ -22,6 +22,9 @@ def getBootVolume():
 def getVolumeStep():
     volStep = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolstep").read()
     return int(volStep)
+def setVolume(volume, volume_step):
+    os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(100, max(0, volume + volume_step))))
+    return min(100, max(0, volume + volume_step))
 def MuteAudio():
     if readVolume() > 1:
         os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
@@ -35,7 +38,7 @@ while not done:
         for event in devices[fd].read():
             event = evdev.util.categorize(event)
             if isinstance(event, evdev.events.RelEvent):
-                vol = readVolume() + event.event.value * getVolumeStep()
+                vol = setVolume(readVolume(), event.event.value * getVolumeStep())
                 print("Volume: {0}".format(vol))
             elif isinstance(event, evdev.events.KeyEvent):
                 if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
