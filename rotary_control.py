@@ -35,7 +35,7 @@ while not done:
         for event in devices[fd].read():
             event = evdev.util.categorize(event)
             if isinstance(event, evdev.events.RelEvent):
-                vol = readVolume() + getVolumeStep()
+                vol = readVolume() + event.event.value * getVolumeStep()
                 print("Volume: {0}".format(vol))
             elif isinstance(event, evdev.events.KeyEvent):
                 if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
