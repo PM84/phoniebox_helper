@@ -13,7 +13,9 @@ Pressing the knob again sets the volume to the boot volume (cf. Phoniebox UI)
 
 ## Materials required:
 
-KY-040 Rotary encoder (e.g. https://amzn.to/3ITAzuR)
+* KY-040 Rotary encoder (e.g. https://amzn.to/3ITAzuR)
+* Jumper Wire Cable Female2Female (F2F) (e.g. https://amzn.to/30BBte7)
+* Raspberry Pi (3; 4) (e.g. https://amzn.to/3GOBElJ)
 
 
 ## Install:
