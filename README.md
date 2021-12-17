@@ -42,6 +42,13 @@ The script itself does not provide any direct output. The output that can be see
 Check the functionality by observing the volume setting in the Phoniebox UI. 
 
 ## Hardware Setup
+Connect the following pins:
+gpio13 = sw
+gpio5 = sk
+gpio6 = dt
+gnd =  Ground
++ = 3.3V
+
 ![20211217_133906](https://user-images.githubusercontent.com/7900120/146546416-24b9c812-90a5-49e3-a687-e497caf94bb8.jpg)
 
 ![20211217_133722](https://user-images.githubusercontent.com/7900120/146546368-8f4df24d-c556-412e-b913-08a820b77a4c.jpg)
