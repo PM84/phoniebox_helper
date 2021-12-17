@@ -27,7 +27,10 @@ dtoverlay=gpio-key,gpio=13,keycode=28,label="ENTER"
 
 pin_a and pin_b mean the GPIO Pins and NOT the physical pins. Adjust these values to your needs.
 
-Reboot your Pi.
+Reboot your Pi:
+```
+sudo reboot
+```
 
 Run the script py
 ```
