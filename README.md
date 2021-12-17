@@ -38,3 +38,5 @@ Go to the directory with rotary_control.py and run the script by
 ```
 python3 rotary_control.py
 ```
+The script itself does not provide any direct output. The output that can be seen is from the Phoniebox. 
+Check the functionality by observing the volume setting in the Phoniebox UI. 
