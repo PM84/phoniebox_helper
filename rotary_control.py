@@ -15,7 +15,7 @@ while not done:
     r, w, x = select.select(devices, [], [])
     for fd in r:
         for event in devices[fd].read():
-        event = evdev.util.categorize(event)
+            event = evdev.util.categorize(event)
             if isinstance(event, evdev.events.RelEvent):
                 value = value + event.event.value
                 print("Value: {0}".format(value))
