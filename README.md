@@ -4,7 +4,7 @@ This script allows the use of a KY-040 Rotary Encoder with Linux on a Raspberry 
 
 There is a one-line installer for this script, created by Splitti (https://github.com/splitti/phoniebox_rotary_control), which sets up a service that monitors input in the background.
 
-## Functions:
+## Features:
 
 Volume is adjusted when rotating by the step size entered in the Phoniebox UI.
 
