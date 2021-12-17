@@ -34,7 +34,7 @@ Reboot your Pi:
 sudo reboot
 ```
 
-Run the script py
+Go to the directory with rotary_control.py and run the script by
 ```
 python3 rotary_control.py
 ```
