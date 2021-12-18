@@ -109,9 +109,8 @@ def checkForConfigurationChange():
     getVolumeStep()
     getMaxVolume()
     getBootVolume()
-    print("Check completed")
-print("starting...")
-rt = RepeatedTimer(15, checkForConfigurationChange)
+
+rt = RepeatedTimer(60, checkForConfigurationChange)
 try:
     done = False
     while not done:
