@@ -43,9 +43,9 @@ Check the functionality by observing the volume setting in the Phoniebox UI.
 
 ## Hardware Setup
 Connect the following pins:
-* gpio13 = sw
-* gpio5 = sk
-* gpio6 = dt
+* gpio13 = SW
+* gpio5 = CLK
+* gpio6 = DT
 * gnd =  Ground
 * `+` = 3.3V
 
