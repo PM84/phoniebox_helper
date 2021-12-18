@@ -22,6 +22,7 @@ import evdev
 import select
 import os
 import time
+import sched
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
@@ -32,7 +33,16 @@ global volStep
 maxVol = -1
 bootVol = -1
 volStep = -1
-starttime = time.time()
+
+# Init scheduler for check for configuration changes
+s = sched.scheduler(time.time, time.sleep)
+def checkConfiguration():
+    getVolumeStep()
+    getMaxVolume()
+    getBootVolume()
+    s.enter(60, 1, checkConfiguration)
+s.enter(60, 1, checkConfiguration)
+s.run()
 
 def readVolume():
     value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
@@ -79,7 +89,3 @@ while not done:
             elif isinstance(event, evdev.events.KeyEvent):
                 if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
                     MuteUnmuteAudio()
-    if 60.0 - ((time.time() - starttime) % 60.0) ==0:
-        getVolumeStep()
-        getMaxVolume()
-        getBootVolume()
