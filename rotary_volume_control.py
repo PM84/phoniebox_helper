@@ -17,14 +17,11 @@
 # python3 rotary_control.py
 
 from __future__ import print_function
-from time import sleep
 from threading import Timer
 
 import evdev
 import select
 import os
-import time
-import sched
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
@@ -35,16 +32,6 @@ global volStep
 maxVol = -1
 bootVol = -1
 volStep = -1
-
-# Init scheduler for check for configuration changes
-# s = sched.scheduler(time.time, time.sleep)
-# def checkConfiguration(sc):
-#     getVolumeStep()
-#     getMaxVolume()
-#     getBootVolume()
-#     s.enter(60, 1, checkConfiguration, (sc,))
-# s.enter(60, 1, checkConfiguration, (s,))
-# s.run()
 
 def readVolume():
     value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
