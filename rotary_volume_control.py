@@ -106,7 +106,7 @@ class RepeatedTimer(object):
         self.is_running = False
 
 
-def checkForConfigurationChange(name):
+def checkForConfigurationChange():
     getVolumeStep()
     getMaxVolume()
     getBootVolume()
