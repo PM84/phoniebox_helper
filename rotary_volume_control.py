@@ -105,11 +105,11 @@ class RepeatedTimer(object):
         self._timer.cancel()
         self.is_running = False
 
-
 def checkForConfigurationChange():
     getVolumeStep()
     getMaxVolume()
     getBootVolume()
+    sleep(15)
     print("Check completed")
 print("starting...")
 rt = RepeatedTimer(1, checkForConfigurationChange)
