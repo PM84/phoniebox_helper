@@ -32,7 +32,6 @@ maxVol = -1
 bootVol = -1
 volStep = -1
 
-
 def readVolume():
     value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
     return int(value)
@@ -41,22 +40,22 @@ def getBootVolume():
     if bootVol > 0:
         return bootVol
     else:
-        bootVol = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getbootvolume").read()
-        return int(bootVol)
+        bootVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getbootvolume").read())
+        return bootVol
 def getVolumeStep():
     global volStep
     if volStep > 0:
         return volStep
     else:
-        volStep = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolstep").read()
-        return int(volStep)
+        volStep = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolstep").read())
+        return volStep
 def getMaxVolume():
     global maxVol
     if maxVol>0:
         return maxVol
     else:
-        maxVol = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getmaxvolume").read()
-        return int(maxVol)
+        maxVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getmaxvolume").read())
+        return maxVol
 def setVolume(volume, volume_step):
     maxVol = getMaxVolume()
     os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
