@@ -36,12 +36,12 @@ volStep = -1
 
 # Init scheduler for check for configuration changes
 s = sched.scheduler(time.time, time.sleep)
-def checkConfiguration():
+def checkConfiguration(sc):
     getVolumeStep()
     getMaxVolume()
     getBootVolume()
-    s.enter(60, 1, checkConfiguration)
-s.enter(60, 1, checkConfiguration)
+    s.enter(60, 1, checkConfiguration, (sc,))
+s.enter(60, 1, checkConfiguration, (s,))
 s.run()
 
 def readVolume():
