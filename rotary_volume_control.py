@@ -17,6 +17,8 @@
 # python3 rotary_control.py
 
 from __future__ import print_function
+from time import sleep
+from threading import Timer
 
 import evdev
 import select
@@ -35,14 +37,14 @@ bootVol = -1
 volStep = -1
 
 # Init scheduler for check for configuration changes
-s = sched.scheduler(time.time, time.sleep)
-def checkConfiguration(sc):
-    getVolumeStep()
-    getMaxVolume()
-    getBootVolume()
-    s.enter(60, 1, checkConfiguration, (sc,))
-s.enter(60, 1, checkConfiguration, (s,))
-s.run()
+# s = sched.scheduler(time.time, time.sleep)
+# def checkConfiguration(sc):
+#     getVolumeStep()
+#     getMaxVolume()
+#     getBootVolume()
+#     s.enter(60, 1, checkConfiguration, (sc,))
+# s.enter(60, 1, checkConfiguration, (s,))
+# s.run()
 
 def readVolume():
     value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
@@ -78,14 +80,50 @@ def MuteUnmuteAudio():
     else:
         os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(getBootVolume()))
 
-done = False
-while not done:
-    r, w, x = select.select(devices, [], [])
-    for fd in r:
-        for event in devices[fd].read():
-            event = evdev.util.categorize(event)
-            if isinstance(event, evdev.events.RelEvent):
-                setVolume(readVolume(), event.event.value * getVolumeStep())
-            elif isinstance(event, evdev.events.KeyEvent):
-                if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
-                    MuteUnmuteAudio()
+class RepeatedTimer(object):
+    def __init__(self, interval, function, *args, **kwargs):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()
+        self.is_running = False
+
+
+def checkForConfigurationChange(name):
+    getVolumeStep()
+    getMaxVolume()
+    getBootVolume()
+    print("Check completed")
+print("starting...")
+rt = RepeatedTimer(1, checkForConfigurationChange)
+try:
+    done = False
+    while not done:
+        r, w, x = select.select(devices, [], [])
+        for fd in r:
+            for event in devices[fd].read():
+                event = evdev.util.categorize(event)
+                if isinstance(event, evdev.events.RelEvent):
+                    setVolume(readVolume(), event.event.value * getVolumeStep())
+                elif isinstance(event, evdev.events.KeyEvent):
+                    if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
+                        MuteUnmuteAudio()
+finally:
+    rt.stop()
