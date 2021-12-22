@@ -68,7 +68,7 @@ def setVolume(volume, volume_step):
     global perfmode
     maxVol = getMaxVolume()
     if perfmode:
-        os.popen("sudo amixer set Master " + str(min(maxVol, max(0, volume + volume_step))) +"%")
+        os.popen("sudo amixer -D pulse sset Master " + str(min(maxVol, max(0, volume + volume_step))) +"%")
     else:
         os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
     return min(maxVol, max(0, volume + volume_step))
