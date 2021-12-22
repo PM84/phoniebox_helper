@@ -29,43 +29,58 @@ devices = {dev.fd: dev for dev in devices}
 global maxVol
 global bootVol
 global volStep
+global perfmode
 maxVol = -1
 bootVol = -1
 volStep = -1
+perfmode = True
 
 def readVolume():
-    value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
+    global perfmode
+    if perfmode:
+        value = os.popen("sudo amixer get Master")
+        print(value)
+    else:
+        value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
     return int(value)
 def getBootVolume():
     global bootVol
-    if bootVol > 0:
+    if bootVol > -1:
         return bootVol
     else:
         bootVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getbootvolume").read())
         return bootVol
 def getVolumeStep():
     global volStep
-    if volStep > 0:
+    if volStep > -1:
         return volStep
     else:
         volStep = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolstep").read())
         return volStep
 def getMaxVolume():
     global maxVol
-    if maxVol>0:
+    if maxVol>-1:
         return maxVol
     else:
         maxVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getmaxvolume").read())
         return maxVol
 def setVolume(volume, volume_step):
+    global perfmode
     maxVol = getMaxVolume()
-    os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
+    if perfmode:
+        os.popen("sudo amixer set Master " + str(min(maxVol, max(0, volume + volume_step))) +"%")
+    else:
+        os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
     return min(maxVol, max(0, volume + volume_step))
 def MuteUnmuteAudio():
-    if readVolume() > 1:
-        os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
+    global perfmode
+    if perfmode:
+        os.popen("sudo amixer set Master toggle")
     else:
-        os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(getBootVolume()))
+        if readVolume() > 0:
+            os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
+        else:
+            os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(getBootVolume()))
 
 class RepeatedTimer(object):
     def __init__(self, interval, function, *args, **kwargs):
