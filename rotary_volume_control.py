@@ -8,7 +8,7 @@
 # # enable rotary encoder
 # dtoverlay=rotary-encoder,pin_a=23,pin_b=24,relative_axis=1
 # dtoverlay=gpio-key,gpio=22,keycode=28,label="ENTER"
-# 
+#
 # pin_a and pin_b mean the GPIO Pins and NOT the physical pins. Adjust these values to your needs.
 #
 # Reboot your Pi.
@@ -22,9 +22,12 @@ from threading import Timer
 import evdev
 import select
 import os
+import subprocess
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
+global recentVolFile
+recentVolFile = "/home/pi/phoniebox_rotary_control/recentvolume"
 
 global maxVol
 global bootVol
@@ -34,8 +37,15 @@ bootVol = -1
 volStep = -1
 
 def readVolume():
-    value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
-    return int(value)
+    global recentVolFile
+    f = open(recentVolFile, "r")
+    recentVol = int(f.read())
+    f.close()
+    if recentVol > 0:
+        return recentVol
+    else:
+        value = os.popen("sudo $(echo -e status\\nclose | nc -w 1 localhost 6600 | grep -o -P '(?<=volume: ).*')").read()
+        return value
 def getBootVolume():
     global bootVol
     if bootVol > 0:
@@ -58,9 +68,14 @@ def getMaxVolume():
         maxVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getmaxvolume").read())
         return maxVol
 def setVolume(volume, volume_step):
+    global recentVolFile
     maxVol = getMaxVolume()
-    os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
-    return min(maxVol, max(0, volume + volume_step))
+    recentVol = min(maxVol, max(0, volume + volume_step))
+    f = open(recentVolFile, "w")
+    f.write(recentVol);
+    f.close()
+    subprocess.popen("sudo /home/pi/phoniebox_rotary_control/scripts/controller/subprocess_setVolume.sh")
+    return recentVol
 def MuteUnmuteAudio():
     if readVolume() > 1:
         os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
