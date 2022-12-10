@@ -2,19 +2,23 @@
 
 recentVolPath="/home/pi/phoniebox_rotary_control/recentvolume.txt"
 
-# while getopts c:v attribute
+while getopts v: attribute
 
-# do
-#     case "${attribute}" in
-#         v) volume=${OPTARG};;
-#     esac
-# done
+do
+    case "${attribute}" in
+        v) volume=${OPTARG};;
+    esac
+done
 
 recentVol=$(</home/pi/phoniebox_rotary_control/recentvolume.txt)
-recentVol=$(($recentVol + 0))
+if [[ $recentVol!=$volume ]]
+then
+  echo $volume > $recentVolPath
+fi
+recentVol=$(($volume + 0))
 sleep 0.5
-recentVol2=$(</home/pi/phoniebox_rotary_control/recentvolume.txt)
-recentVol2=$(($recentVol2 + 0))
+# recentVol2=$(</home/pi/phoniebox_rotary_control/recentvolume.txt)
+recentVol2=$(($volume + 0))
 
 if [[ $recentVol==$recentVol2 ]]
 then

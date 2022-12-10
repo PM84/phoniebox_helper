@@ -76,10 +76,8 @@ def setVolume(volume, eventvalue, volume_step):
     volume_step = int(volume_step)
     vol = volume + volume_step
     recentVol = min(maxVol, max(0, vol))
-    f = open(recentVolFile, "w")
-    f.write(recentVol);
-    f.close()
-    subprocess.Popen("sudo /home/pi/phoniebox_rotary_control/scripts/controller/subprocess_setVolume.sh").pid
+    scriptargs = ['-v', str(recentVol)]
+    subprocess.Popen(["/home/pi/phoniebox_rotary_control/scripts/controller/subprocess_setVolume.sh"] + scriptargs).pid
     return recentVol
 def MuteUnmuteAudio():
     if readVolume() > 1:
