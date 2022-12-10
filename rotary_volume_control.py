@@ -24,10 +24,12 @@ import select
 import os
 import subprocess
 
+from subprocess import Popen
+
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
 global recentVolFile
-recentVolFile = "/home/pi/phoniebox_rotary_control/recentvolume"
+recentVolFile = "/home/pi/phoniebox_rotary_control/recentvolume.txt"
 
 global maxVol
 global bootVol
@@ -67,14 +69,17 @@ def getMaxVolume():
     else:
         maxVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getmaxvolume").read())
         return maxVol
-def setVolume(volume, volume_step):
+def setVolume(volume, eventvalue, volume_step):
     global recentVolFile
     maxVol = getMaxVolume()
-    recentVol = min(maxVol, max(0, volume + volume_step))
+    volume = int(eventvalue) * int(volume_step)
+    volume_step = int(volume_step)
+    vol = volume + volume_step
+    recentVol = min(maxVol, max(0, vol))
     f = open(recentVolFile, "w")
     f.write(recentVol);
     f.close()
-    subprocess.popen("sudo /home/pi/phoniebox_rotary_control/scripts/controller/subprocess_setVolume.sh")
+    subprocess.Popen("sudo /home/pi/phoniebox_rotary_control/scripts/controller/subprocess_setVolume.sh").pid
     return recentVol
 def MuteUnmuteAudio():
     if readVolume() > 1:
@@ -121,7 +126,7 @@ try:
             for event in devices[fd].read():
                 event = evdev.util.categorize(event)
                 if isinstance(event, evdev.events.RelEvent):
-                    setVolume(readVolume(), event.event.value * getVolumeStep())
+                    setVolume(readVolume(), event.event.value, getVolumeStep())
                 elif isinstance(event, evdev.events.KeyEvent):
                     if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
                         MuteUnmuteAudio()
