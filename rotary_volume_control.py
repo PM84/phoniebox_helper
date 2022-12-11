@@ -36,7 +36,8 @@ bootVol = -1
 volStep = -1
 
 def readVolume():
-    value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
+    value = subprocess.check_output(["/home/pi/phoniebox_rotary_control/scripts/controller/subprocess_getVolume.sh"])
+    # value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
     return int(value)
 def getBootVolume():
     global bootVol
