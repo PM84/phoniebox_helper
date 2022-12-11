@@ -8,7 +8,7 @@
 # # enable rotary encoder
 # dtoverlay=rotary-encoder,pin_a=23,pin_b=24,relative_axis=1
 # dtoverlay=gpio-key,gpio=22,keycode=28,label="ENTER"
-# 
+#
 # pin_a and pin_b mean the GPIO Pins and NOT the physical pins. Adjust these values to your needs.
 #
 # Reboot your Pi.
@@ -22,6 +22,8 @@ from threading import Timer
 import evdev
 import select
 import os
+import subprocess
+from subprocess import Popen
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 devices = {dev.fd: dev for dev in devices}
@@ -59,7 +61,10 @@ def getMaxVolume():
         return maxVol
 def setVolume(volume, volume_step):
     maxVol = getMaxVolume()
-    os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
+    # os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
+    recentVol = min(maxVol, max(0, volume + volume_step))
+    scriptargs = ['-v', str(recentVol)]
+    subprocess.Popen(["/home/pi/phoniebox_rotary_control/scripts/controller/subprocess_setVolume.sh"] + scriptargs).pid
     return min(maxVol, max(0, volume + volume_step))
 def MuteUnmuteAudio():
     if readVolume() > 1:
