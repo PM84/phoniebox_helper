@@ -37,6 +37,17 @@ volStep = -1
 
 def readVolume():
     try:
+        # Versuche zunächst amixer (direkter Zugriff)
+        value = os.popen("amixer get PCM | grep -o '[0-9]*%' | head -1 | tr -d '%'").read().strip()
+        if value and value.isdigit():
+            return int(value)
+
+        # Fallback auf mpd
+        value = os.popen("mpc volume | grep -o '[0-9]*%' | tr -d '%'").read().strip()
+        if value and value.isdigit():
+            return int(value)
+
+        # Letzter Fallback auf original script
         value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read().strip()
         if value and value.isdigit():
             return int(value)
@@ -113,27 +124,36 @@ def setVolume(volume, volume_step):
             print(f"Lautstärkewert außerhalb des gültigen Bereichs: {recentVol}")
             recentVol = max(0, min(100, recentVol))
 
-        # Primärer Versuch: Direkt das playout_controls.sh Script verwenden
-        cmd = f"sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v={recentVol}"
-        result = os.system(cmd)
+        # Primärer Versuch: Lokales subprocess_setVolume.sh verwenden (ohne Bash-Fehler)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        subprocess_script = os.path.join(script_dir, "subprocess_setVolume.sh")
 
-        if result == 0:
-            print(f"Lautstärke erfolgreich gesetzt auf: {recentVol}")
-        else:
-            print(f"Primärer Befehl fehlgeschlagen (Code: {result}), versuche Fallback...")
+        if os.path.exists(subprocess_script):
+            try:
+                result = subprocess.run([subprocess_script, '-v', str(recentVol)], check=True, capture_output=True, text=True)
+                print(f"Lautstärke erfolgreich mit lokalem Script gesetzt auf: {recentVol}")
+                if result.stdout:
+                    print(f"Script-Output: {result.stdout.strip()}")
+            except subprocess.CalledProcessError as e:
+                print(f"Lokales Script fehlgeschlagen: {e}")
+                print(f"Versuche Fallback auf playout_controls.sh...")
 
-            # Fallback: Lokales subprocess_setVolume.sh verwenden
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            subprocess_script = os.path.join(script_dir, "subprocess_setVolume.sh")
-
-            if os.path.exists(subprocess_script):
-                try:
-                    subprocess.run([subprocess_script, '-v', str(recentVol)], check=True)
+                # Fallback: Original playout_controls.sh (mit möglichen Bash-Fehlern)
+                cmd = f"sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v={recentVol}"
+                result = os.system(cmd)
+                if result == 0:
                     print(f"Lautstärke mit Fallback-Script gesetzt auf: {recentVol}")
-                except subprocess.CalledProcessError as e:
-                    print(f"Fallback-Script fehlgeschlagen: {e}")
+                else:
+                    print(f"Auch Fallback fehlgeschlagen (Code: {result})")
+        else:
+            print(f"Lokales Script nicht gefunden: {subprocess_script}")
+            print(f"Verwende Original playout_controls.sh als Fallback...")
+            cmd = f"sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v={recentVol}"
+            result = os.system(cmd)
+            if result == 0:
+                print(f"Lautstärke mit Original-Script gesetzt auf: {recentVol}")
             else:
-                print(f"Fallback-Script nicht gefunden: {subprocess_script}")
+                print(f"Original-Script fehlgeschlagen (Code: {result})")
 
         return recentVol
     except Exception as e:
