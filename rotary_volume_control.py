@@ -38,7 +38,7 @@ volStep = -1
 def readVolume():
     try:
         # Versuche zunächst amixer (direkter Zugriff)
-        value = os.popen("amixer get PCM | grep -o '[0-9]*%' | head -1 | tr -d '%'").read().strip()
+        value = os.popen("amixer get Master | grep -o '[0-9]*%' | head -1 | tr -d '%'").read().strip()
         if value and value.isdigit():
             return int(value)
 
@@ -129,6 +129,8 @@ def setVolume(volume, volume_step):
         subprocess_script = os.path.join(script_dir, "subprocess_setVolume.sh")
 
         if os.path.exists(subprocess_script):
+            # Stelle sicher, dass Script ausführbar ist
+            os.chmod(subprocess_script, 0o755)
             try:
                 result = subprocess.run([subprocess_script, '-v', str(recentVol)], check=True, capture_output=True, text=True)
                 print(f"Lautstärke erfolgreich mit lokalem Script gesetzt auf: {recentVol}")

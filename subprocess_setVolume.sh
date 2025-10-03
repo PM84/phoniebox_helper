@@ -39,7 +39,7 @@ if [ "${VOLUMEMANAGER}" == "amixer" ]; then
   # volume handling alternative with amixer not mpd (2020-06-12 related to ticket #973)
   # Fallback für AUDIOIFACENAME wenn nicht gesetzt
   if [ -z "${AUDIOIFACENAME}" ]; then
-      AUDIOIFACENAME="PCM"  # Standard Audio Interface
+      AUDIOIFACENAME="Master"  # Standard Audio Interface
   fi
   amixer sset "${AUDIOIFACENAME}" ${volume}%
 else
