@@ -36,36 +36,109 @@ bootVol = -1
 volStep = -1
 
 def readVolume():
-    value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read()
-    return int(value)
+    try:
+        value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolume").read().strip()
+        if value and value.isdigit():
+            return int(value)
+        else:
+            print(f"Ungültiger Lautstärkewert gelesen: '{value}'")
+            return 50  # Standardwert falls der gelesene Wert ungültig ist
+    except Exception as e:
+        print(f"Fehler beim Lesen der Lautstärke: {e}")
+        return 50
 def getBootVolume():
     global bootVol
     if bootVol > 0:
         return bootVol
     else:
-        bootVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getbootvolume").read())
-        return bootVol
+        try:
+            value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getbootvolume").read().strip()
+            if value and value.isdigit():
+                bootVol = int(value)
+            else:
+                print(f"Ungültiger Boot-Lautstärkewert: '{value}'")
+                bootVol = 75  # Standardwert
+            return bootVol
+        except Exception as e:
+            print(f"Fehler beim Lesen der Boot-Lautstärke: {e}")
+            bootVol = 75
+            return bootVol
 def getVolumeStep():
     global volStep
     if volStep > 0:
         return volStep
     else:
-        volStep = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolstep").read())
-        return volStep
+        try:
+            value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getvolstep").read().strip()
+            if value and value.isdigit():
+                volStep = int(value)
+            else:
+                print(f"Ungültiger Lautstärke-Schritt-Wert: '{value}'")
+                volStep = 3  # Standardwert
+            return volStep
+        except Exception as e:
+            print(f"Fehler beim Lesen des Lautstärke-Schritts: {e}")
+            volStep = 3
+            return volStep
 def getMaxVolume():
     global maxVol
-    if maxVol>0:
+    if maxVol > 0:
         return maxVol
     else:
-        maxVol = int(os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getmaxvolume").read())
-        return maxVol
+        try:
+            value = os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=getmaxvolume").read().strip()
+            if value and value.isdigit():
+                maxVol = int(value)
+            else:
+                print(f"Ungültiger Max-Lautstärkewert: '{value}'")
+                maxVol = 100  # Standardwert
+            return maxVol
+        except Exception as e:
+            print(f"Fehler beim Lesen der maximalen Lautstärke: {e}")
+            maxVol = 100
+            return maxVol
 def setVolume(volume, volume_step):
-    maxVol = getMaxVolume()
-    # os.system("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v="+str(min(maxVol, max(0, volume + volume_step))))
-    recentVol = min(maxVol, max(0, volume + volume_step))
-    scriptargs = ['-v', str(recentVol)]
-    subprocess.Popen(["/home/pi/phoniebox_rotary_control/scripts/controller/subprocess_setVolume.sh"] + scriptargs).pid
-    return min(maxVol, max(0, volume + volume_step))
+    try:
+        maxVol = getMaxVolume()
+        # Validierung der Eingabewerte
+        if not isinstance(volume, (int, float)) or not isinstance(volume_step, (int, float)):
+            print(f"Ungültige Werte: volume={volume}, volume_step={volume_step}")
+            return volume
+
+        # Berechnung des neuen Lautstärkewerts
+        recentVol = min(maxVol, max(0, int(volume + volume_step)))
+
+        # Zusätzliche Validierung des berechneten Werts
+        if not (0 <= recentVol <= 100):
+            print(f"Lautstärkewert außerhalb des gültigen Bereichs: {recentVol}")
+            recentVol = max(0, min(100, recentVol))
+
+        # Primärer Versuch: Direkt das playout_controls.sh Script verwenden
+        cmd = f"sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=setvolume -v={recentVol}"
+        result = os.system(cmd)
+
+        if result == 0:
+            print(f"Lautstärke erfolgreich gesetzt auf: {recentVol}")
+        else:
+            print(f"Primärer Befehl fehlgeschlagen (Code: {result}), versuche Fallback...")
+
+            # Fallback: Lokales subprocess_setVolume.sh verwenden
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            subprocess_script = os.path.join(script_dir, "subprocess_setVolume.sh")
+
+            if os.path.exists(subprocess_script):
+                try:
+                    subprocess.run([subprocess_script, '-v', str(recentVol)], check=True)
+                    print(f"Lautstärke mit Fallback-Script gesetzt auf: {recentVol}")
+                except subprocess.CalledProcessError as e:
+                    print(f"Fallback-Script fehlgeschlagen: {e}")
+            else:
+                print(f"Fallback-Script nicht gefunden: {subprocess_script}")
+
+        return recentVol
+    except Exception as e:
+        print(f"Fehler beim Setzen der Lautstärke: {e}")
+        return volume
 def MuteUnmuteAudio():
     if readVolume() > 1:
         os.popen("sudo /home/pi/RPi-Jukebox-RFID/scripts/playout_controls.sh -c=mute")
@@ -111,9 +184,14 @@ try:
             for event in devices[fd].read():
                 event = evdev.util.categorize(event)
                 if isinstance(event, evdev.events.RelEvent):
-                    setVolume(readVolume(), event.event.value * getVolumeStep())
+                    current_vol = readVolume()
+                    vol_step = getVolumeStep()
+                    vol_change = event.event.value * vol_step
+                    print(f"Volume change: current={current_vol}, step={vol_step}, change={vol_change}")
+                    setVolume(current_vol, vol_change)
                 elif isinstance(event, evdev.events.KeyEvent):
                     if event.keycode == "KEY_ENTER" and event.keystate == event.key_up:
+                        print("Mute/Unmute triggered")
                         MuteUnmuteAudio()
 finally:
     rt.stop()
